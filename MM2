@@ -1,10 +1,9 @@
 -- =========================================================
--- adiatkotak hub | MM2 Mobile (Fixed AutoShoot, AutoThrow & Desync GodMode)
+-- adiatkotak hub | MM2 Mobile (Fixed ESP + AutoPickup + Hero)
 -- =========================================================
 
 local SLATE_URL = "https://raw.githubusercontent.com/PulseZax/Slate/refs/heads/main/.lua"
 
--- Загрузка библиотеки Slate
 local success, Slate = pcall(function()
     return loadstring(game:HttpGet(SLATE_URL), "@Slate")()
 end)
@@ -17,7 +16,6 @@ end
 pcall(function() Slate.Cleanup() end)
 pcall(function() Slate:PreloadIcons({ "lucide" }) end)
 
--- Создание главного окна
 local Window = Slate:CreateWindow({
     Name = "adiatkotak hub",
     Subtitle = "Murder Mystery 2",
@@ -30,7 +28,6 @@ local Window = Slate:CreateWindow({
 pcall(function() Slate.Theme.Preset("Ash") end)
 pcall(function() Slate:SetFontFamily("JosefinSans") end)
 
--- Настройки функций
 local Settings = {
     ESP = true,
     GunESP = true,
@@ -47,89 +44,30 @@ local Settings = {
     FlingMurder = false,
 }
 
--- 1. ВКЛАДКА "ГЛАВНАЯ"
+-- ===================== UI =====================
 local TabMain = Window:CreateTab({ Name = "Главная", Icon = "home" })
 local SecMain = TabMain:CreateSection({ Name = "Движение и Персонаж" })
 
-SecMain:Toggle({
-    Name = "NoClip (Сквозь стены)",
-    Default = false,
-    Callback = function(v) Settings.NoClip = v end,
-})
+SecMain:Toggle({ Name = "NoClip (Сквозь стены)", Default = false, Callback = function(v) Settings.NoClip = v end })
+SecMain:Toggle({ Name = "God Mode (Клон-пустышка + Свобода)", Default = false, Callback = function(v) Settings.GodMode = v end })
+SecMain:Toggle({ Name = "Авто-подбор пистолета", Default = false, Callback = function(v) Settings.AutoPickup = v end })
 
-SecMain:Toggle({
-    Name = "God Mode (Клон-пустышка + Свобода)",
-    Default = false,
-    Callback = function(v) 
-        Settings.GodMode = v 
-    end,
-})
-
-SecMain:Toggle({
-    Name = "Авто-подбор пистолета",
-    Default = false,
-    Callback = function(v) Settings.AutoPickup = v end,
-})
-
--- 2. ВКЛАДКА "БОЙ"
 local TabCombat = Window:CreateTab({ Name = "Бой", Icon = "swords" })
 local SecCombat = TabCombat:CreateSection({ Name = "Аимбот и Авто-атака" })
 
-SecCombat:Toggle({
-    Name = "Аим Шерифа",
-    Default = false,
-    Callback = function(v) Settings.SheriffAim = v end,
-})
+SecCombat:Toggle({ Name = "Аим Шерифа", Default = false, Callback = function(v) Settings.SheriffAim = v end })
+SecCombat:Toggle({ Name = "Авто-выстрел (Шериф)", Default = false, Callback = function(v) Settings.AutoShoot = v end })
+SecCombat:Toggle({ Name = "Аим броска ножа (Убийца)", Default = false, Callback = function(v) Settings.MurderThrowAim = v end })
+SecCombat:Toggle({ Name = "Авто-бросок ножа", Default = false, Callback = function(v) Settings.AutoThrow = v end })
 
-SecCombat:Toggle({
-    Name = "Авто-выстрел (Шериф)",
-    Default = false,
-    Callback = function(v) Settings.AutoShoot = v end,
-})
-
-SecCombat:Toggle({
-    Name = "Аим броска ножа (Убийца)",
-    Default = false,
-    Callback = function(v) Settings.MurderThrowAim = v end,
-})
-
-SecCombat:Toggle({
-    Name = "Авто-бросок ножа",
-    Default = false,
-    Callback = function(v) Settings.AutoThrow = v end,
-})
-
--- 3. ВКЛАДКА "ВИЗУАЛЫ"
 local TabVisuals = Window:CreateTab({ Name = "Визуалы", Icon = "eye" })
 local SecVisuals = TabVisuals:CreateSection({ Name = "ESP Подсветка" })
 
-SecVisuals:Toggle({
-    Name = "Подсветка ролей (ESP)",
-    Default = true,
-    Callback = function(v) Settings.ESP = v end,
-})
+SecVisuals:Toggle({ Name = "Подсветка ролей (ESP)", Default = true, Callback = function(v) Settings.ESP = v end })
+SecVisuals:Toggle({ Name = "Подсветка пистолета", Default = true, Callback = function(v) Settings.GunESP = v end })
+SecVisuals:Toggle({ Name = "Круг FOV", Default = false, Callback = function(v) Settings.ShowFOV = v end })
+SecVisuals:Slider({ Name = "Размер круга FOV", Min = 30, Max = 500, Default = 120, Callback = function(v) Settings.FOVRadius = v end })
 
-SecVisuals:Toggle({
-    Name = "Подсветка пистолета",
-    Default = true,
-    Callback = function(v) Settings.GunESP = v end,
-})
-
-SecVisuals:Toggle({
-    Name = "Круг FOV",
-    Default = false,
-    Callback = function(v) Settings.ShowFOV = v end,
-})
-
-SecVisuals:Slider({
-    Name = "Размер круга FOV",
-    Min = 30,
-    Max = 500,
-    Default = 120,
-    Callback = function(v) Settings.FOVRadius = v end,
-})
-
--- 4. ВКЛАДКА "ИНВЕНТАРЬ"
 local TabSkins = Window:CreateTab({ Name = "Инвентарь", Icon = "box" })
 local SecSkins = TabSkins:CreateSection({ Name = "Визуальные скины" })
 
@@ -166,29 +104,16 @@ SecSkins:Button({
     end,
 })
 
--- 5. ВКЛАДКА "ТРОЛЛИНГ"
 local TabTroll = Window:CreateTab({ Name = "Троллинг", Icon = "flame" })
 local SecTroll = TabTroll:CreateSection({ Name = "Физика и Флинг" })
 
-SecTroll:Toggle({
-    Name = "Флинг Шерифа",
-    Default = false,
-    Callback = function(v) Settings.FlingSheriff = v end,
-})
+SecTroll:Toggle({ Name = "Флинг Шерифа", Default = false, Callback = function(v) Settings.FlingSheriff = v end })
+SecTroll:Toggle({ Name = "Флинг Убийцы", Default = false, Callback = function(v) Settings.FlingMurder = v end })
 
-SecTroll:Toggle({
-    Name = "Флинг Убийцы",
-    Default = false,
-    Callback = function(v) Settings.FlingMurder = v end,
-})
-
----------------------------------------------------------
--- ИГРОВАЯ ЛОГИКА И ИСПРАВЛЕНИЯ
----------------------------------------------------------
+-- ===================== ЛОГИКА =====================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local VirtualInputManager = game:GetService("VirtualInputManager")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
@@ -201,31 +126,71 @@ FOVCircle.Color = Color3.fromRGB(255, 255, 255)
 
 local dummyModel = nil
 
-local function getRole(p)
-    if not p or not p.Character then return "Innocent" end
-    local char, bp = p.Character, p:FindFirstChild("Backpack")
-    local function check(c)
-        if not c then return nil end
-        for _, t in ipairs(c:GetChildren()) do
-            if t:IsA("Tool") then
-                local n = t.Name:lower()
-                if n:find("knife") or n:find("murderer") or n:find("blade") then return "Murderer"
-                elseif n:find("gun") or n:find("revolver") or n:find("sheriff") then return "Sheriff" end
+-- Кэш "был ли игрок шерифом" — для детекта Героя
+local wasSheriff = {}
+
+-- ---------- РОЛИ ----------
+local function scanTools(container)
+    if not container then return nil end
+    for _, t in ipairs(container:GetChildren()) do
+        if t:IsA("Tool") then
+            local n = t.Name:lower()
+            if n:find("knife") or n:find("blade") or n:find("murder") then
+                return "Murderer"
+            end
+            if n == "gun" or n:find("revolver") or n:find("sheriff") then
+                return "Sheriff"
             end
         end
     end
-    return check(char) or check(bp) or "Innocent"
+    return nil
+end
+
+local function getRole(p)
+    if not p then return "Innocent" end
+    local char = p.Character
+    local bp = p:FindFirstChild("Backpack")
+
+    local role = scanTools(char) or scanTools(bp)
+
+    if role == "Sheriff" then
+        -- Запоминаем, что игрок был шерифом
+        wasSheriff[p] = true
+        return "Sheriff"
+    end
+
+    if role == "Murderer" then
+        return "Murderer"
+    end
+
+    -- Пистолета нет, но игрок был шерифом → Герой
+    if wasSheriff[p] and p ~= LocalPlayer then
+        return "Hero"
+    end
+
+    -- Проверка атрибута (если форк MM2 отдаёт)
+    if p:GetAttribute("MM2Role") == "Hero" then
+        return "Hero"
+    end
+
+    return "Innocent"
 end
 
 local function getSheriff()
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and getRole(p) == "Sheriff" and p.Character and p.Character:FindFirstChild("Head") then return p end
+        if p ~= LocalPlayer and getRole(p) == "Sheriff"
+           and p.Character and p.Character:FindFirstChild("Head") then
+            return p
+        end
     end
 end
 
 local function getMurderer()
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and getRole(p) == "Murderer" and p.Character and p.Character:FindFirstChild("Head") then return p end
+        if p ~= LocalPlayer and getRole(p) == "Murderer"
+           and p.Character and p.Character:FindFirstChild("Head") then
+            return p
+        end
     end
 end
 
@@ -246,22 +211,101 @@ local function getClosestPlayer()
     return closest
 end
 
--- Логика God Mode и Флинга
+-- ---------- ESP ----------
+local function ensureHighlight(char)
+    if not char then return nil end
+    local hl = char:FindFirstChild("MM2_Role_Highlight")
+    if not hl then
+        hl = Instance.new("Highlight")
+        hl.Name = "MM2_Role_Highlight"
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        hl.OutlineTransparency = 0
+        hl.FillTransparency = 0.5
+        hl.Parent = char
+    end
+    return hl
+end
+
+local function applyRoleColor(hl, role)
+    if role == "Murderer" then
+        hl.FillColor = Color3.fromRGB(255, 30, 30)
+        hl.OutlineColor = Color3.fromRGB(255, 0, 0)
+    elseif role == "Sheriff" then
+        hl.FillColor = Color3.fromRGB(30, 120, 255)
+        hl.OutlineColor = Color3.fromRGB(0, 80, 255)
+    elseif role == "Hero" then
+        hl.FillColor = Color3.fromRGB(255, 220, 30)   -- жёлтый
+        hl.OutlineColor = Color3.fromRGB(255, 200, 0)
+    else
+        hl.FillColor = Color3.fromRGB(30, 230, 80)
+        hl.OutlineColor = Color3.fromRGB(0, 200, 60)
+    end
+end
+
+-- Хук на респавн — сбрасываем Highlight
+local function hookChar(p)
+    p.CharacterAdded:Connect(function(char)
+        local old = char:FindFirstChild("MM2_Role_Highlight")
+        if old then old:Destroy() end
+    end)
+end
+for _, p in ipairs(Players:GetPlayers()) do hookChar(p) end
+Players.PlayerAdded:Connect(hookChar)
+
+-- ---------- АВТОПОДБОР: состояние ----------
+local pickupState = {
+    active = false,        -- сейчас летим за пистолетом
+    originalCFrame = nil,  -- куда вернуться
+    dropTool = nil,        -- за каким Tool летим
+}
+
+local function findGunDrop()
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("Tool") and (obj.Name == "GunDrop" or obj.Name:lower():find("gun")) then
+            local h = obj:FindFirstChild("Handle")
+            if h and h:IsA("BasePart") then
+                return obj, h
+            end
+        end
+    end
+    return nil
+end
+
+local function hasGun()
+    local char = LocalPlayer.Character
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    local function scan(c)
+        if not c then return false end
+        for _, t in ipairs(c:GetChildren()) do
+            if t:IsA("Tool") then
+                local n = t.Name:lower()
+                if n == "gun" or n:find("revolver") or n:find("sheriff") then
+                    return true
+                end
+            end
+        end
+        return false
+    end
+    return scan(char) or scan(bp)
+end
+
+-- ---------- GOD MODE / NOCLIP ----------
 RunService.Stepped:Connect(function()
     local char = LocalPlayer.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
-        local hrp = char.HumanoidRootPart
         local hum = char:FindFirstChildOfClass("Humanoid")
 
         if Settings.GodMode then
             if hum then hum.Health = hum.MaxHealth end
-            -- Клонирование пустышки для визуального обмана
             if not dummyModel and char.Archivable then
                 char.Archivable = true
-                dummyModel = char:Clone()
-                dummyModel.Parent = Workspace
-                for _, v in ipairs(dummyModel:GetDescendants()) do
-                    if v:IsA("Script") or v:IsA("LocalScript") then v:Destroy() end
+                local ok, clone = pcall(function() return char:Clone() end)
+                if ok and clone then
+                    dummyModel = clone
+                    dummyModel.Parent = Workspace
+                    for _, v in ipairs(dummyModel:GetDescendants()) do
+                        if v:IsA("Script") or v:IsA("LocalScript") then v:Destroy() end
+                    end
                 end
             end
         else
@@ -276,20 +320,50 @@ RunService.Stepped:Connect(function()
                 if p:IsA("BasePart") then p.CanCollide = false end
             end
         end
+    end
+end)
 
-        -- Флинг
-        local targetP = Settings.FlingMurder and getMurderer() or (Settings.FlingSheriff and getSheriff() or nil)
-        if targetP and targetP.Character and targetP.Character:FindFirstChild("HumanoidRootPart") and hrp then
-            hrp.CFrame = targetP.Character.HumanoidRootPart.CFrame
-            hrp.AssemblyLinearVelocity = Vector3.new(30000, 30000, 30000)
-            hrp.AssemblyAngularVelocity = Vector3.new(30000, 30000, 30000)
+-- ---------- ФЛИНГ (в отдельном потоке) ----------
+task.spawn(function()
+    while task.wait(0.1) do
+        if Settings.FlingMurder or Settings.FlingSheriff then
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local target = nil
+                if Settings.FlingMurder then target = getMurderer() end
+                if not target and Settings.FlingSheriff then target = getSheriff() end
+                local tHRP = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+                if tHRP then
+                    hrp.CFrame = tHRP.CFrame
+                    hrp.AssemblyLinearVelocity = Vector3.new(30000, 30000, 30000)
+                    hrp.AssemblyAngularVelocity = Vector3.new(30000, 30000, 30000)
+                end
+            end
         end
     end
 end)
 
+-- ---------- ВСПОМОГАТЕЛЬНАЯ: поиск Tool ----------
+local function findTool(keyword)
+    local char = LocalPlayer.Character
+    local bp = LocalPlayer:FindFirstChild("Backpack")
+    local function scan(c)
+        if not c then return nil end
+        for _, t in ipairs(c:GetChildren()) do
+            if t:IsA("Tool") then
+                local n = t.Name:lower()
+                if n:find(keyword) then return t end
+            end
+        end
+        return nil
+    end
+    return scan(char) or scan(bp)
+end
+
+-- ---------- ОСНОВНОЙ ЦИКЛ ----------
 local lastAction = 0
 
--- Авто-выстрел и Авто-бросок в RenderStepped
 RunService.RenderStepped:Connect(function()
     FOVCircle.Visible = Settings.ShowFOV
     FOVCircle.Radius = Settings.FOVRadius
@@ -298,7 +372,7 @@ RunService.RenderStepped:Connect(function()
     local myRole = getRole(LocalPlayer)
     local char = LocalPlayer.Character
 
-    -- 1. Исправленный Авто-выстрел Шерифа
+    -- 1. Авто-выстрел Шерифа
     if myRole == "Sheriff" and char then
         local murd = getMurderer()
         if murd and murd.Character and murd.Character:FindFirstChild("Head") then
@@ -306,19 +380,19 @@ RunService.RenderStepped:Connect(function()
             if Settings.SheriffAim then
                 Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetHead.Position)
             end
-            
+
             if Settings.AutoShoot and (tick() - lastAction > 0.3) then
-                local tool = char:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+                local tool = findTool("gun") or findTool("revolver")
                 if tool then
-                    tool.Parent = char -- Авто-взятие в руки
-                    tool:Activate() -- Прямая активация
+                    tool.Parent = char
+                    pcall(function() tool:Activate() end)
                     lastAction = tick()
                 end
             end
         end
     end
 
-    -- 2. Исправленный Авто-бросок Убийцы
+    -- 2. Авто-бросок Убийцы
     if myRole == "Murderer" and char then
         local target = getClosestPlayer()
         if target and target.Character and target.Character:FindFirstChild("Head") then
@@ -326,43 +400,76 @@ RunService.RenderStepped:Connect(function()
             if Settings.MurderThrowAim then
                 Camera.CFrame = CFrame.lookAt(Camera.CFrame.Position, targetHead.Position)
             end
-            
+
             if Settings.AutoThrow and (tick() - lastAction > 0.4) then
-                local tool = char:FindFirstChildOfClass("Tool") or LocalPlayer.Backpack:FindFirstChildOfClass("Tool")
+                local tool = findTool("knife") or findTool("blade")
                 if tool then
                     tool.Parent = char
-                    tool:Activate()
+                    pcall(function() tool:Activate() end)
                     lastAction = tick()
                 end
             end
         end
     end
 
-    -- Отрисовка Role ESP
+    -- 3. Отрисовка Role ESP
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
-            local hl = p.Character:FindFirstChild("MM2_Role_Highlight")
+            local hl = ensureHighlight(p.Character)
             if hl then
                 hl.Enabled = Settings.ESP
                 if Settings.ESP then
-                    local role = getRole(p)
-                    if role == "Murderer" then hl.FillColor = Color3.fromRGB(255, 30, 30)
-                    elseif role == "Sheriff" then hl.FillColor = Color3.fromRGB(30, 120, 255)
-                    else hl.FillColor = Color3.fromRGB(30, 230, 80) end
+                    applyRoleColor(hl, getRole(p))
                 end
             end
         end
     end
 
-    -- Автоподбор пистолета
+    -- 4. Автоподбор пистолета (телепорт → возврат)
     if Settings.AutoPickup and char and char:FindFirstChild("HumanoidRootPart") then
-        for _, obj in ipairs(Workspace:GetDescendants()) do
-            if obj.Name == "GunDrop" or (obj:IsA("Tool") and obj.Name:lower():find("gun")) then
-                local h = obj:FindFirstChild("Handle") or obj
+        local hrp = char.HumanoidRootPart
+
+        if pickupState.active then
+            -- Пистолет получен или дроп исчез → возврат
+            local dropGone = not pickupState.dropTool
+                or not pickupState.dropTool.Parent
+            if hasGun() or dropGone then
+                if pickupState.originalCFrame then
+                    hrp.CFrame = pickupState.originalCFrame
+                end
+                pickupState.active = false
+                pickupState.originalCFrame = nil
+                pickupState.dropTool = nil
+            else
+                -- Всё ещё летим к дропу
+                local h = pickupState.dropTool:FindFirstChild("Handle")
                 if h and h:IsA("BasePart") then
-                    char.HumanoidRootPart.CFrame = h.CFrame + Vector3.new(0, 2, 0)
+                    hrp.CFrame = h.CFrame + Vector3.new(0, 2, 0)
+                else
+                    if pickupState.originalCFrame then
+                        hrp.CFrame = pickupState.originalCFrame
+                    end
+                    pickupState.active = false
+                    pickupState.originalCFrame = nil
+                    pickupState.dropTool = nil
                 end
             end
+        else
+            -- Ищем дроп и стартуем
+            local tool, handle = findGunDrop()
+            if tool and handle then
+                pickupState.active = true
+                pickupState.originalCFrame = hrp.CFrame
+                pickupState.dropTool = tool
+                hrp.CFrame = handle.CFrame + Vector3.new(0, 2, 0)
+            end
+        end
+    else
+        -- Автоподбор выключен — сбросить состояние
+        if pickupState.active then
+            pickupState.active = false
+            pickupState.originalCFrame = nil
+            pickupState.dropTool = nil
         end
     end
 end)
@@ -370,7 +477,7 @@ end)
 pcall(function()
     Slate:Notify({
         Title = "adiatkotak hub",
-        Description = "Бой и God Mode обновлены!",
+        Description = "ESP ролей + Hero + Автоподбор загружены!",
         Icon = "check-circle",
         Duration = 5,
     })
